@@ -2,9 +2,9 @@
 
 # PythonRobotics
 [![Build Status](https://travis-ci.org/AtsushiSakai/PythonRobotics.svg?branch=master)](https://travis-ci.org/AtsushiSakai/PythonRobotics)
+[![Say Thanks!](https://img.shields.io/badge/Say%20Thanks-!-1EAEDB.svg)](https://saythanks.io/to/AtsushiSakai)
 
 Python codes for robotics algorithm.
-
 
 # Table of Contents
    * [What is this?](#what-is-this)
@@ -61,12 +61,18 @@ Python codes for robotics algorithm.
       * [LQR based path planning](#lqr-based-path-planning)
       * [Optimal Trajectory in a Frenet Frame](#optimal-trajectory-in-a-frenet-frame)
    * [Path tracking](#path-tracking)
+      * [move to a pose control](#move-to-a-pose-control)
       * [Pure pursuit tracking](#pure-pursuit-tracking)
       * [Stanley control](#stanley-control)
       * [Rear wheel feedback control](#rear-wheel-feedback-control)
       * [Linear–quadratic regulator (LQR) steering control](#linearquadratic-regulator-lqr-steering-control)
       * [Linear–quadratic regulator (LQR) speed and steering control](#linearquadratic-regulator-lqr-speed-and-steering-control)
       * [Model predictive speed and steering control](#model-predictive-speed-and-steering-control)
+   * [Arm Navigation](#arm-navigation)
+      * [Two joint arm to point control](#two-joint-arm-to-point-control)
+      * [N joint arm to point control](#n-joint-arm-to-point-control)
+   * [Aerial Navigation](#aerial-navigation)
+      * [drone 3d trajectory following](#drone-3d-trajectory-following)
    * [License](#license)
    * [Contribution](#contribution)
    * [Support](#support)
@@ -78,11 +84,16 @@ This is a Python code collection of robotics algorithms, especially for autonomo
 
 Features:
 
-1. Widely used and practical algorithms are selected.
+1. Easy to read for understanding each algorithm's basic idea.
 
-2. Minimum dependency.
+2. Widely used and practical algorithms are selected.
 
-3. Easy to read for understanding each algorithm's basic idea.
+3. Minimum dependency.
+
+See this paper for more details:
+
+- [\[1808\.10703\] PythonRobotics: a Python code collection of robotics algorithms](https://arxiv.org/abs/1808.10703) ([BibTeX](https://github.com/AtsushiSakai/PythonRoboticsPaper/blob/master/python_robotics.bib))
+
 
 # Requirements
 
@@ -100,7 +111,7 @@ Features:
 
 # How to use
 
-1. Install the required libraries.
+1. Install the required libraries. You can use environment.yml with conda command.
 
 2. Clone this repo.
 
@@ -645,6 +656,17 @@ Ref:
 
 # Path tracking
 
+## move to a pose control
+
+This is a simulation of moving to a pose control
+
+![2](https://github.com/AtsushiSakai/PythonRobotics/raw/master/PathTracking/move_to_pose/animation.gif)
+
+Ref:
+
+- [P. I. Corke, "Robotics, Vision and Control" \| SpringerLink p102](https://link.springer.com/book/10.1007/978-3-642-20144-8)
+
+
 ## Pure pursuit tracking
 
 Path tracking simulation with pure pursuit steering control and PID speed control.
@@ -710,17 +732,44 @@ Path tracking simulation with iterative linear model predictive speed and steeri
 
 <img src="https://github.com/AtsushiSakai/PythonRobotics/raw/master/PathTracking/model_predictive_speed_and_steer_control/animation.gif" width="640">
 
-This code uses cvxpy as an optimization modeling tool.
-
-- [Welcome to CVXPY](http://www.cvxpy.org/en/latest/)
-
 Ref:
 
-- [Vehicle Dynamics and Control \| Rajesh Rajamani \| Springer](http://www.springer.com/us/book/9781461414322)
+- [notebook](https://github.com/AtsushiSakai/PythonRobotics/blob/master/PathTracking/model_predictive_speed_and_steer_control/notebook.ipynb)
 
-- [MPC Course Material \- MPC Lab @ UC\-Berkeley](http://www.mpc.berkeley.edu/mpc-course-material)
 
- 
+# Arm Navigation
+
+## Two joint arm to point control
+
+Two joint arm to a point control simulation. 
+
+This is a interactive simulation.
+
+You can set the goal position of the end effector with left-click on the ploting area. 
+
+![3](https://github.com/AtsushiSakai/PythonRobotics/raw/master/ArmNavigation/two_joint_arm_to_point_control/animation.gif)
+
+
+## N joint arm to point control
+
+N joint arm to a point control simulation.
+
+This is a interactive simulation.
+
+You can set the goal position of the end effector with left-click on the ploting area. 
+
+![3](https://github.com/AtsushiSakai/PythonRobotics/raw/master/ArmNavigation/n_joint_arm_to_point_control/animation.gif)
+
+In this simulation N = 10, however, you can change it.
+
+# Aerial Navigation
+
+## drone 3d trajectory following 
+
+This is a 3d trajectory following simulation for a quadrotor.
+
+![3](https://github.com/AtsushiSakai/PythonRobotics/raw/master/AerialNavigation/drone_3d_trajectory_following/animation.gif)
+
 
 # License 
 
@@ -734,15 +783,21 @@ If your PR is merged multiple times, I will add your account to the author list.
 
 # Support
 
-You can support this project financially via Patreon.
+If you or your company would like to support this project, please consider:
 
-You can get e-mail technical supports about the codes if you are being a patron.
+- [Become a backer or sponsor on Patreon](https://www.patreon.com/myenigma)
 
-- [Atsushi Sakai is creating Open Source Software \| Patreon](https://www.patreon.com/myenigma)
+- [One-time donation via PayPal](https://www.paypal.me/myenigmapay/)
 
-PayPal donation is also welcome.
+You can add your name or your company logo in README if you are a patron.
 
-[![Support via PayPal](https://cdn.rawgit.com/twolfson/paypal-github-button/1.0.0/dist/button.svg)](https://www.paypal.me/myenigmapay/)
+E-mail consultant is also available.
+
+ 　
+
+Your comment using [![Say Thanks!](https://img.shields.io/badge/Say%20Thanks-!-1EAEDB.svg)](https://saythanks.io/to/AtsushiSakai) is also welcome. 
+
+This is a list: [Users comments](https://github.com/AtsushiSakai/PythonRobotics/blob/master/users_comments.md)
 
 # Authors
 
