@@ -174,13 +174,13 @@ class BITStar(object):
         # Computing the sampling space
         cMin = math.sqrt(pow(self.start[0] - self.goal[1], 2) +
                          pow(self.start[0] - self.goal[1], 2)) / 1.5
-        xCenter = np.matrix([[(self.start[0] + self.goal[0]) / 2.0],
-                             [(self.goal[1] - self.start[1]) / 2.0], [0]])
-        a1 = np.matrix([[(self.goal[0] - self.start[0]) / cMin],
-                        [(self.goal[1] - self.start[1]) / cMin], [0]])
+        xCenter = np.array([[(self.start[0] + self.goal[0]) / 2.0],
+                            [(self.goal[1] - self.start[1]) / 2.0], [0]])
+        a1 = np.array([[(self.goal[0] - self.start[0]) / cMin],
+                       [(self.goal[1] - self.start[1]) / cMin], [0]])
         etheta = math.atan2(a1[1], a1[0])
         # first column of idenity matrix transposed
-        id1_t = np.matrix([1.0, 0.0, 0.0])
+        id1_t = np.array([1.0, 0.0, 0.0]).reshape(1, 3)
         M = np.dot(a1, id1_t)
         U, S, Vh = np.linalg.svd(M, 1, 1)
         C = np.dot(np.dot(U, np.diag(
@@ -459,7 +459,6 @@ class BITStar(object):
         # add an edge to the edge queue is the path might improve the solution
         for neighbor in neigbors:
             sid = neighbor[0]
-            scoord = neighbor[1]
             estimated_f_score = self.computeDistanceCost(
                 self.startId, vid) + self.computeHeuristicCost(sid, self.goalId) + self.computeDistanceCost(vid, sid)
             if estimated_f_score < self.g_scores[self.goalId]:
@@ -474,7 +473,7 @@ class BITStar(object):
             for v, edges in self.tree.vertices.items():
                 if v != vid and (v, vid) not in self.edge_queue and (vid, v) not in self.edge_queue:
                     vcoord = self.tree.nodeIdToRealWorldCoord(v)
-                    if(np.linalg.norm(vcoord - currCoord, 2) <= self.r and v != vid):
+                    if(np.linalg.norm(vcoord - currCoord, 2) <= self.r):
                         neigbors.append((vid, vcoord))
 
             for neighbor in neigbors:
@@ -531,7 +530,6 @@ class BITStar(object):
 
     def drawGraph(self, xCenter=None, cBest=None, cMin=None, etheta=None,
                   samples=None, start=None, end=None, tree=None):
-        print("Plotting Graph")
         plt.clf()
         for rnd in samples:
             if rnd is not None:
@@ -562,9 +560,9 @@ class BITStar(object):
         t = np.arange(0, 2 * math.pi + 0.1, 0.1)
         x = [a * math.cos(it) for it in t]
         y = [b * math.sin(it) for it in t]
-        R = np.matrix([[math.cos(angle), math.sin(angle)],
-                       [-math.sin(angle), math.cos(angle)]])
-        fx = R * np.matrix([x, y])
+        R = np.array([[math.cos(angle), math.sin(angle)],
+                      [-math.sin(angle), math.cos(angle)]])
+        fx = R @ np.array([x, y])
         px = np.array(fx[0, :] + cx).flatten()
         py = np.array(fx[1, :] + cy).flatten()
         plt.plot(cx, cy, "xc")
