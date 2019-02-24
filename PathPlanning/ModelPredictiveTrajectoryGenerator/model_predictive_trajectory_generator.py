@@ -16,11 +16,11 @@ max_iter = 100
 h = np.array([0.5, 0.02, 0.02]).T  # parameter sampling distance
 cost_th = 0.1
 
-show_animation = False
+show_animation = True
 
 
-def plot_arrow(x, y, yaw, length=1.0, width=0.5, fc="r", ec="k"):
-    u"""
+def plot_arrow(x, y, yaw, length=1.0, width=0.5, fc="r", ec="k"):  # pragma: no cover
+    """
     Plot arrow
     """
     plt.arrow(x, y, length * math.cos(yaw), length * math.sin(yaw),
@@ -91,8 +91,7 @@ def selection_learning_param(dp, p, k0, target):
     return mina
 
 
-def show_trajectory(target, xc, yc):
-
+def show_trajectory(target, xc, yc):  # pragma: no cover
     plt.clf()
     plot_arrow(target.x, target.y, target.yaw)
     plt.plot(xc, yc, "-r")
@@ -123,7 +122,7 @@ def optimize_trajectory(target, k0, p):
         p += alpha * np.array(dp)
         #  print(p.T)
 
-        if show_animation:
+        if show_animation:  # pragma: no cover
             show_trajectory(target, xc, yc)
     else:
         xc, yc, yawc, p = None, None, None, None
@@ -132,7 +131,7 @@ def optimize_trajectory(target, k0, p):
     return xc, yc, yawc, p
 
 
-def test_optimize_trajectory():
+def test_optimize_trajectory():  # pragma: no cover
 
     #  target = motion_model.State(x=5.0, y=2.0, yaw=np.deg2rad(00.0))
     target = motion_model.State(x=5.0, y=2.0, yaw=np.deg2rad(90.0))
@@ -142,35 +141,16 @@ def test_optimize_trajectory():
 
     x, y, yaw, p = optimize_trajectory(target, k0, init_p)
 
-    show_trajectory(target, x, y)
-    #  plt.plot(x, y, "-r")
-    plot_arrow(target.x, target.y, target.yaw)
-    plt.axis("equal")
-    plt.grid(True)
-    plt.show()
+    if show_animation:
+        show_trajectory(target, x, y)
+        plot_arrow(target.x, target.y, target.yaw)
+        plt.axis("equal")
+        plt.grid(True)
+        plt.show()
 
 
-def test_trajectory_generate():
-    s = 5.0  # [m]
-    k0 = 0.0
-    km = np.deg2rad(30.0)
-    kf = np.deg2rad(-30.0)
-
-    #  plt.plot(xk, yk, "xr")
-    #  plt.plot(t, kp)
-    #  plt.show()
-
-    x, y = motion_model.generate_trajectory(s, km, kf, k0)
-
-    plt.plot(x, y, "-r")
-    plt.axis("equal")
-    plt.grid(True)
-    plt.show()
-
-
-def main():
+def main():  # pragma: no cover
     print(__file__ + " start!!")
-    #  test_trajectory_generate()
     test_optimize_trajectory()
 
 

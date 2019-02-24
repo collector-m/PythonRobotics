@@ -201,10 +201,10 @@ def dubins_path_planning(sx, sy, syaw, ex, ey, eyaw, c):
     lpx, lpy, lpyaw, mode, clen = dubins_path_planning_from_origin(
         lex, ley, leyaw, c)
 
-    px = [math.cos(-syaw) * x + math.sin(-syaw) *
-          y + sx for x, y in zip(lpx, lpy)]
-    py = [- math.sin(-syaw) * x + math.cos(-syaw) *
-          y + sy for x, y in zip(lpx, lpy)]
+    px = [math.cos(-syaw) * x + math.sin(-syaw)
+          * y + sx for x, y in zip(lpx, lpy)]
+    py = [- math.sin(-syaw) * x + math.cos(-syaw)
+          * y + sy for x, y in zip(lpx, lpy)]
     pyaw = [pi_2_pi(iyaw + syaw) for iyaw in lpyaw]
 
     return px, py, pyaw, mode, clen
@@ -218,7 +218,7 @@ def generate_course(length, mode, c):
 
     for m, l in zip(mode, length):
         pd = 0.0
-        if m is "S":
+        if m == "S":
             d = 1.0 * c
         else:  # turning couse
             d = np.deg2rad(3.0)
@@ -228,11 +228,11 @@ def generate_course(length, mode, c):
             px.append(px[-1] + d / c * math.cos(pyaw[-1]))
             py.append(py[-1] + d / c * math.sin(pyaw[-1]))
 
-            if m is "L":  # left turn
+            if m == "L":  # left turn
                 pyaw.append(pyaw[-1] + d)
-            elif m is "S":  # Straight
+            elif m == "S":  # Straight
                 pyaw.append(pyaw[-1])
-            elif m is "R":  # right turn
+            elif m == "R":  # right turn
                 pyaw.append(pyaw[-1] - d)
             pd += d
 
@@ -240,18 +240,18 @@ def generate_course(length, mode, c):
         px.append(px[-1] + d / c * math.cos(pyaw[-1]))
         py.append(py[-1] + d / c * math.sin(pyaw[-1]))
 
-        if m is "L":  # left turn
+        if m == "L":  # left turn
             pyaw.append(pyaw[-1] + d)
-        elif m is "S":  # Straight
+        elif m == "S":  # Straight
             pyaw.append(pyaw[-1])
-        elif m is "R":  # right turn
+        elif m == "R":  # right turn
             pyaw.append(pyaw[-1] - d)
         pd += d
 
     return px, py, pyaw
 
 
-def plot_arrow(x, y, yaw, length=1.0, width=0.5, fc="r", ec="k"):
+def plot_arrow(x, y, yaw, length=1.0, width=0.5, fc="r", ec="k"):  # pragma: no cover
     """
     Plot arrow
     """

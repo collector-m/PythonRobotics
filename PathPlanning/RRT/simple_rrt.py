@@ -94,7 +94,7 @@ class RRT():
 
         return path
 
-    def DrawGraph(self, rnd=None):
+    def DrawGraph(self, rnd=None):  # pragma: no cover
         """
         Draw Graph
         """
@@ -144,8 +144,8 @@ class Node():
         self.parent = None
 
 
-def main():
-    print("start simple RRT path planning")
+def main(gx=5.0, gy=10.0):
+    print("start " + __file__)
 
     # ====Search Path with RRT====
     obstacleList = [
@@ -157,12 +157,12 @@ def main():
         (9, 5, 2)
     ]  # [x,y,size]
     # Set Initial parameters
-    rrt = RRT(start=[0, 0], goal=[5, 10],
+    rrt = RRT(start=[0, 0], goal=[gx, gy],
               randArea=[-2, 15], obstacleList=obstacleList)
     path = rrt.Planning(animation=show_animation)
 
     # Draw final path
-    if show_animation:
+    if show_animation:  # pragma: no cover
         rrt.DrawGraph()
         plt.plot([x for (x, y) in path], [y for (x, y) in path], '-r')
         plt.grid(True)

@@ -357,14 +357,14 @@ def reeds_shepp_path_planning(sx, sy, syaw,
 
     paths = calc_paths(sx, sy, syaw, gx, gy, gyaw, maxc, step_size)
 
-    if len(paths) == 0:
+    if not paths:
         #  print("No path")
         #  print(sx, sy, syaw, gx, gy, gyaw)
         return None, None, None, None, None
 
     minL = float("Inf")
     best_path_index = -1
-    for i in range(len(paths)):
+    for i, _ in enumerate(paths):
         if paths[i].L <= minL:
             minL = paths[i].L
             best_path_index = i
@@ -393,7 +393,7 @@ def test():
         px, py, pyaw, mode, clen = reeds_shepp_path_planning(
             start_x, start_y, start_yaw, end_x, end_y, end_yaw, curvature, step_size)
 
-        if show_animation:
+        if show_animation:  # pragma: no cover
             plt.cla()
             plt.plot(px, py, label="final course " + str(mode))
 
@@ -430,7 +430,7 @@ def main():
     px, py, pyaw, mode, clen = reeds_shepp_path_planning(
         start_x, start_y, start_yaw, end_x, end_y, end_yaw, curvature, step_size)
 
-    if show_animation:
+    if show_animation:  # pragma: no cover
         plt.cla()
         plt.plot(px, py, label="final course " + str(mode))
 

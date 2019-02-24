@@ -74,7 +74,7 @@ class RRT():
         return path
 
     def choose_parent(self, newNode, nearinds):
-        if len(nearinds) == 0:
+        if not nearinds:
             return newNode
 
         dlist = []
@@ -152,7 +152,7 @@ class RRT():
             if abs(self.nodeList[i].yaw - self.end.yaw) <= YAWTH:
                 fgoalinds.append(i)
 
-        if len(fgoalinds) == 0:
+        if not fgoalinds:
             return None
 
         mincost = min([self.nodeList[i].cost for i in fgoalinds])
@@ -202,8 +202,8 @@ class RRT():
                 #  print("rewire")
                 self.nodeList[i] = tNode
 
-    def DrawGraph(self, rnd=None):
-        u"""
+    def DrawGraph(self, rnd=None):  # pragma: no cover
+        """
         Draw Graph
         """
         plt.clf()
@@ -288,7 +288,7 @@ def main():
     path = rrt.Planning(animation=show_animation)
 
     # Draw final path
-    if show_animation:
+    if show_animation:  # pragma: no cover
         rrt.DrawGraph()
         plt.plot([x for (x, y) in path], [y for (x, y) in path], '-r')
         plt.grid(True)

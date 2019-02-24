@@ -134,7 +134,7 @@ def ekf_estimation(xEst, PEst, z, u):
     return xEst, PEst
 
 
-def plot_covariance_ellipse(xEst, PEst):
+def plot_covariance_ellipse(xEst, PEst):  # pragma: no cover
     Pxy = PEst[0:2, 0:2]
     eigval, eigvec = np.linalg.eig(Pxy)
 
@@ -193,7 +193,7 @@ def main():
 
         if show_animation:
             plt.cla()
-            plt.plot(hz[:, 0], hz[:, 1], ".g")
+            plt.plot(hz[0, :], hz[1, :], ".g")
             plt.plot(hxTrue[0, :].flatten(),
                      hxTrue[1, :].flatten(), "-b")
             plt.plot(hxDR[0, :].flatten(),
