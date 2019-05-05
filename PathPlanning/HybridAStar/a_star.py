@@ -2,17 +2,17 @@
 
 A* grid based planning
 
-author: Atsushi Sakai(@Atsushi_twi)
-        Nikos Kanargias (nkana@tee.gr)
+author: Nikos Kanargias (nkana@tee.gr)
 
 See Wikipedia article (https://en.wikipedia.org/wiki/A*_search_algorithm)
 
 """
 
-import matplotlib.pyplot as plt
 import math
+import heapq
+import matplotlib.pyplot as plt
 
-show_animation = True
+show_animation = False
 
 
 class Node:
@@ -40,7 +40,7 @@ def calc_final_path(ngoal, closedset, reso):
     return rx, ry
 
 
-def a_star_planning(sx, sy, gx, gy, ox, oy, reso, rr):
+def dp_planning(sx, sy, gx, gy, ox, oy, reso, rr):
     """
     gx: goal x position [m]
     gx: goal x position [m]
@@ -60,12 +60,20 @@ def a_star_planning(sx, sy, gx, gy, ox, oy, reso, rr):
     motion = get_motion_model()
 
     openset, closedset = dict(), dict()
-    openset[calc_index(nstart, xw, minx, miny)] = nstart
+    openset[calc_index(ngoal, xw, minx, miny)] = ngoal
+    pq = []
+    pq.append((0, calc_index(ngoal, xw, minx, miny)))
 
     while 1:
-        c_id = min(
-            openset, key=lambda o: openset[o].cost + calc_heuristic(ngoal, openset[o]))
-        current = openset[c_id]
+        if not pq:
+            break
+        cost, c_id = heapq.heappop(pq)
+        if c_id in openset:
+            current = openset[c_id]
+            closedset[c_id] = current
+            openset.pop(c_id)
+        else:
+            continue
 
         # show graph
         if show_animation:  # pragma: no cover
@@ -73,16 +81,7 @@ def a_star_planning(sx, sy, gx, gy, ox, oy, reso, rr):
             if len(closedset.keys()) % 10 == 0:
                 plt.pause(0.001)
 
-        if current.x == ngoal.x and current.y == ngoal.y:
-            print("Find goal")
-            ngoal.pind = current.pind
-            ngoal.cost = current.cost
-            break
-
         # Remove the item from the open set
-        del openset[c_id]
-        # Add it to the closed set
-        closedset[c_id] = current
 
         # expand search grid based on motion model
         for i, _ in enumerate(motion):
@@ -99,14 +98,19 @@ def a_star_planning(sx, sy, gx, gy, ox, oy, reso, rr):
 
             if n_id not in openset:
                 openset[n_id] = node  # Discover a new node
+                heapq.heappush(
+                    pq, (node.cost, calc_index(node, xw, minx, miny)))
             else:
                 if openset[n_id].cost >= node.cost:
                     # This path is the best until now. record it!
                     openset[n_id] = node
+                    heapq.heappush(
+                        pq, (node.cost, calc_index(node, xw, minx, miny)))
 
-    rx, ry = calc_final_path(ngoal, closedset, reso)
+    rx, ry = calc_final_path(closedset[calc_index(
+        nstart, xw, minx, miny)], closedset, reso)
 
-    return rx, ry
+    return rx, ry, closedset
 
 
 def calc_heuristic(n1, n2):
@@ -138,15 +142,9 @@ def calc_obstacle_map(ox, oy, reso, vr):
     miny = round(min(oy))
     maxx = round(max(ox))
     maxy = round(max(oy))
-    #  print("minx:", minx)
-    #  print("miny:", miny)
-    #  print("maxx:", maxx)
-    #  print("maxy:", maxy)
 
     xwidth = round(maxx - minx)
     ywidth = round(maxy - miny)
-    #  print("xwidth:", xwidth)
-    #  print("ywidth:", ywidth)
 
     # obstacle map generation
     obmap = [[False for i in range(ywidth)] for i in range(xwidth)]
@@ -190,7 +188,7 @@ def main():
     sy = 10.0  # [m]
     gx = 50.0  # [m]
     gy = 50.0  # [m]
-    grid_size = 1.0  # [m]
+    grid_size = 2.0  # [m]
     robot_size = 1.0  # [m]
 
     ox, oy = [], []
@@ -221,7 +219,7 @@ def main():
         plt.grid(True)
         plt.axis("equal")
 
-    rx, ry = a_star_planning(sx, sy, gx, gy, ox, oy, grid_size, robot_size)
+    rx, ry, _ = dp_planning(sx, sy, gx, gy, ox, oy, grid_size, robot_size)
 
     if show_animation:  # pragma: no cover
         plt.plot(rx, ry, "-r")
@@ -229,4 +227,5 @@ def main():
 
 
 if __name__ == '__main__':
+    show_animation = True
     main()
