@@ -1,12 +1,13 @@
-from unittest import TestCase
-import sys
 import os
+import sys
+from unittest import TestCase
+
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) +
-                "/../PathPlanning/RRTstar/")
+                "/../PathPlanning/RRTStar/")
 
 try:
     import rrt_star as m
-except:
+except ImportError:
     raise
 
 
@@ -23,4 +24,3 @@ class Test(TestCase):
 if __name__ == '__main__':  # pragma: no cover
     test = Test()
     test.test1()
-    print(aa)
