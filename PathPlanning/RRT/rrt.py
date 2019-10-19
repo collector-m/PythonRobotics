@@ -10,6 +10,7 @@ import math
 import random
 
 import matplotlib.pyplot as plt
+import numpy as np
 
 show_animation = True
 
@@ -32,7 +33,7 @@ class RRT:
             self.parent = None
 
     def __init__(self, start, goal, obstacle_list, rand_area,
-                 expand_dis=3.0, path_resolution=1.0, goal_sample_rate=5, max_iter=500):
+                 expand_dis=3.0, path_resolution=0.5, goal_sample_rate=5, max_iter=500):
         """
         Setting Parameter
 
@@ -74,9 +75,10 @@ class RRT:
             if animation and i % 5 == 0:
                 self.draw_graph(rnd_node)
 
-            if self.calc_dist_to_goal(new_node.x, new_node.y) <= self.expand_dis:
-                print("Goal!!")
-                return self.generate_final_course(len(self.node_list) - 1)
+            if self.calc_dist_to_goal(self.node_list[-1].x, self.node_list[-1].y) <= self.expand_dis:
+                final_node = self.steer(self.node_list[-1], self.end, self.expand_dis)
+                if self.check_collision(final_node, self.obstacle_list):
+                    return self.generate_final_course(len(self.node_list) - 1)
 
             if animation and i % 5:
                 self.draw_graph(rnd_node)
@@ -104,10 +106,8 @@ class RRT:
 
         d, _ = self.calc_distance_and_angle(new_node, to_node)
         if d <= self.path_resolution:
-            new_node.x = to_node.x
-            new_node.y = to_node.y
-            new_node.path_x[-1] = to_node.x
-            new_node.path_y[-1] = to_node.y
+            new_node.path_x.append(to_node.x)
+            new_node.path_y.append(to_node.y)
 
         new_node.parent = from_node
 
@@ -145,13 +145,22 @@ class RRT:
                 plt.plot(node.path_x, node.path_y, "-g")
 
         for (ox, oy, size) in self.obstacle_list:
-            plt.plot(ox, oy, "ok", ms=30 * size)
+            self.plot_circle(ox, oy, size)
 
         plt.plot(self.start.x, self.start.y, "xr")
         plt.plot(self.end.x, self.end.y, "xr")
+        plt.axis("equal")
         plt.axis([-2, 15, -2, 15])
         plt.grid(True)
         plt.pause(0.01)
+
+    @staticmethod
+    def plot_circle(x, y, size, color="-b"):  # pragma: no cover
+        deg = list(range(0, 360, 5))
+        deg.append(0)
+        xl = [x + size * math.cos(np.deg2rad(d)) for d in deg]
+        yl = [y + size * math.sin(np.deg2rad(d)) for d in deg]
+        plt.plot(xl, yl, color)
 
     @staticmethod
     def get_nearest_node_index(node_list, rnd_node):
@@ -182,7 +191,7 @@ class RRT:
         return d, theta
 
 
-def main(gx=5.0, gy=10.0):
+def main(gx=6.0, gy=10.0):
     print("start " + __file__)
 
     # ====Search Path with RRT====
@@ -192,8 +201,9 @@ def main(gx=5.0, gy=10.0):
         (3, 8, 2),
         (3, 10, 2),
         (7, 5, 2),
-        (9, 5, 2)
-    ]  # [x,y,size]
+        (9, 5, 2),
+        (8, 10, 1)
+    ]  # [x, y, radius]
     # Set Initial parameters
     rrt = RRT(start=[0, 0],
               goal=[gx, gy],
