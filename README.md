@@ -1,6 +1,8 @@
 <img src="https://github.com/AtsushiSakai/PythonRobotics/raw/master/icon.png?raw=true" align="right" width="300" alt="header pic"/>
 
 # PythonRobotics
+![GitHub_Action_Linux_CI](https://github.com/AtsushiSakai/PythonRobotics/workflows/Linux_CI/badge.svg)
+![GitHub_Action_MacOS_CI](https://github.com/AtsushiSakai/PythonRobotics/workflows/MacOS_CI/badge.svg)
 [![Build Status](https://travis-ci.org/AtsushiSakai/PythonRobotics.svg?branch=master)](https://travis-ci.org/AtsushiSakai/PythonRobotics)
 [![Documentation Status](https://readthedocs.org/projects/pythonrobotics/badge/?version=latest)](https://pythonrobotics.readthedocs.io/en/latest/?badge=latest)
 [![Build status](https://ci.appveyor.com/api/projects/status/sb279kxuv1be391g?svg=true)](https://ci.appveyor.com/project/AtsushiSakai/pythonrobotics)
@@ -8,7 +10,6 @@
 [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/AtsushiSakai/PythonRobotics.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/AtsushiSakai/PythonRobotics/context:python)
 [![CodeFactor](https://www.codefactor.io/repository/github/atsushisakai/pythonrobotics/badge/master)](https://www.codefactor.io/repository/github/atsushisakai/pythonrobotics/overview/master)
 [![tokei](https://tokei.rs/b1/github/AtsushiSakai/PythonRobotics)](https://github.com/AtsushiSakai/PythonRobotics)
-[![Say Thanks!](https://img.shields.io/badge/Say%20Thanks-!-1EAEDB.svg)](https://saythanks.io/to/AtsushiSakai)
 
 Python codes for robotics algorithm.
 
@@ -31,8 +32,6 @@ Python codes for robotics algorithm.
    * [SLAM](#slam)
       * [Iterative Closest Point (ICP) Matching](#iterative-closest-point-icp-matching)
       * [FastSLAM 1.0](#fastslam-10)
-      * [Pose Optimization SLAM 2D](#pose-optimization-slam-2d)
-      * [Pose Optimization SLAM 3D](#pose-optimization-slam-3d)
    * [Path Planning](#path-planning)
       * [Dynamic Window Approach](#dynamic-window-approach)
       * [Grid based search](#grid-based-search)
@@ -93,7 +92,7 @@ See this paper for more details:
 
 # Requirements
 
-- Python 3.7.x (2.7 is not supported)
+- Python 3.8.x
 
 - numpy
 
@@ -120,8 +119,6 @@ All animation gifs are stored here: [AtsushiSakai/PythonRoboticsGifs: Animation 
 1. Clone this repo.
 
 > git clone https://github.com/AtsushiSakai/PythonRobotics.git
-
-> cd PythonRobotics/
 
 
 2. Install the required libraries. You can use environment.yml with conda command.
@@ -249,21 +246,6 @@ Ref:
 - [PROBABILISTIC ROBOTICS](http://www.probabilistic-robotics.org/)
 
 - [SLAM simulations by Tim Bailey](http://www-personal.acfr.usyd.edu.au/tbailey/software/slam_simulations.htm)
-
-
-## Pose Optimization SLAM 2D
-
-This is a graph based 2D pose optimization SLAM example.
-
-![3](https://github.com/AtsushiSakai/PythonRoboticsGifs/raw/master/SLAM/PoseOptimizationSLAM2D/animation.gif)
-
-
-## Pose Optimization SLAM 3D
-
-This is a graph based 3D pose optimization SLAM example.
-
-![3](https://github.com/AtsushiSakai/PythonRoboticsGifs/raw/master/SLAM/PoseOptimizationSLAM3D/animation.gif)
-
 
 
 # Path Planning
@@ -570,7 +552,7 @@ MIT
 
 # Use-case
 
-If this project helps your robotics project, please let me know with [![Say Thanks!](https://img.shields.io/badge/Say%20Thanks-!-1EAEDB.svg)](https://saythanks.io/to/AtsushiSakai).
+If this project helps your robotics project, please let me know with creating an issue.
 
 Your robot's video, which is using PythonRobotics, is very welcome!!
 
@@ -578,7 +560,7 @@ This is a list of other user's comment and references:[users\_comments](https://
 
 # Contribution
 
-A small PR like bug fix is welcome.
+Any contribution is welcome!!
 
 If your PR is merged multiple times, I will add your account to the author list.
 
@@ -592,23 +574,15 @@ If you use this project's code in industry, we'd love to hear from you as well; 
 
 If you or your company would like to support this project, please consider:
 
+- [Sponsor @AtsushiSakai on GitHub Sponsors](https://github.com/sponsors/AtsushiSakai)
+
 - [Become a backer or sponsor on Patreon](https://www.patreon.com/myenigma)
 
 - [One-time donation via PayPal](https://www.paypal.me/myenigmapay/)
 
-You can add your name or your company logo in README if you are a patron.
-
-E-mail consultant is also available.
-
- 　
-
-Your comment using [![Say Thanks!](https://img.shields.io/badge/Say%20Thanks-!-1EAEDB.svg)](https://saythanks.io/to/AtsushiSakai) is also welcome. 
-
-This is a list: [Users comments](https://github.com/AtsushiSakai/PythonRobotics/blob/master/users_comments.md)
-
 # Authors
 
-- [Atsushi Sakai](https://github.com/AtsushiSakai/) ([@Atsushi_twi](https://twitter.com/Atsushi_twi))
+- [Atsushi Sakai](https://github.com/AtsushiSakai/)
 
 - [Daniel Ingram](https://github.com/daniel-s-ingram)
 
@@ -622,5 +596,10 @@ This is a list: [Users comments](https://github.com/AtsushiSakai/PythonRobotics/
 
 - [Ryohei Sasaki](https://github.com/rsasaki0109)
 
+- [Göktuğ Karakaşlı](https://github.com/goktug97)
+
+- [Guillaume Jacquenot](https://github.com/Gjacquenot)
+
+- [Erwin Lejeune](https://github.com/guilyx)
 
 

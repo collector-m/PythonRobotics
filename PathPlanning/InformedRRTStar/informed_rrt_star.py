@@ -5,7 +5,8 @@ author: Karan Chawla
         Atsushi Sakai(@Atsushi_twi)
 
 Reference: Informed RRT*: Optimal Sampling-based Path planning Focused via
-Direct Sampling of an Admissible Ellipsoidal Heuristichttps://arxiv.org/pdf/1404.2334.pdf
+Direct Sampling of an Admissible Ellipsoidal Heuristic
+https://arxiv.org/pdf/1404.2334.pdf
 
 """
 
@@ -14,6 +15,7 @@ import math
 import random
 
 import matplotlib.pyplot as plt
+from scipy.spatial.transform import Rotation as Rot
 import numpy as np
 
 show_animation = True
@@ -38,9 +40,9 @@ class InformedRRTStar:
     def informed_rrt_star_search(self, animation=True):
 
         self.node_list = [self.start]
-        # max length we expect to find in our 'informed' sample space, starts as infinite
+        # max length we expect to find in our 'informed' sample space,
+        # starts as infinite
         cBest = float('inf')
-        pathLen = float('inf')
         solutionSet = set()
         path = None
 
@@ -52,13 +54,14 @@ class InformedRRTStar:
         a1 = np.array([[(self.goal.x - self.start.x) / cMin],
                        [(self.goal.y - self.start.y) / cMin], [0]])
 
-        etheta = math.atan2(a1[1], a1[0])
-        # first column of idenity matrix transposed
+        e_theta = math.atan2(a1[1], a1[0])
+        # first column of identity matrix transposed
         id1_t = np.array([1.0, 0.0, 0.0]).reshape(1, 3)
         M = a1 @ id1_t
         U, S, Vh = np.linalg.svd(M, True, True)
         C = np.dot(np.dot(U, np.diag(
-            [1.0, 1.0, np.linalg.det(U) * np.linalg.det(np.transpose(Vh))])), Vh)
+            [1.0, 1.0, np.linalg.det(U) * np.linalg.det(np.transpose(Vh))])),
+                   Vh)
 
         for i in range(self.max_iter):
             # Sample space is defined by cBest
@@ -67,17 +70,16 @@ class InformedRRTStar:
             # cBest changes when a new path is found
 
             rnd = self.informed_sample(cBest, cMin, xCenter, C)
-            nind = self.get_nearest_list_index(self.node_list, rnd)
-            nearestNode = self.node_list[nind]
+            n_ind = self.get_nearest_list_index(self.node_list, rnd)
+            nearestNode = self.node_list[n_ind]
             # steer
             theta = math.atan2(rnd[1] - nearestNode.y, rnd[0] - nearestNode.x)
-            newNode = self.get_new_node(theta, nind, nearestNode)
+            newNode = self.get_new_node(theta, n_ind, nearestNode)
             d = self.line_cost(nearestNode, newNode)
 
-            isCollision = self.collision_check(newNode, self.obstacle_list)
-            isCollisionEx = self.check_collision_extend(nearestNode, theta, d)
+            noCollision = self.check_collision(nearestNode, theta, d)
 
-            if isCollision and isCollisionEx:
+            if noCollision:
                 nearInds = self.find_near_nodes(newNode)
                 newNode = self.choose_parent(newNode, nearInds)
 
@@ -85,18 +87,19 @@ class InformedRRTStar:
                 self.rewire(newNode, nearInds)
 
                 if self.is_near_goal(newNode):
-                    solutionSet.add(newNode)
-                    lastIndex = len(self.node_list) - 1
-                    tempPath = self.get_final_course(lastIndex)
-                    tempPathLen = self.get_path_len(tempPath)
-                    if tempPathLen < pathLen:
-                        path = tempPath
-                        cBest = tempPathLen
-
+                    if self.check_segment_collision(newNode.x, newNode.y,
+                                                    self.goal.x, self.goal.y):
+                        solutionSet.add(newNode)
+                        lastIndex = len(self.node_list) - 1
+                        tempPath = self.get_final_course(lastIndex)
+                        tempPathLen = self.get_path_len(tempPath)
+                        if tempPathLen < cBest:
+                            path = tempPath
+                            cBest = tempPathLen
             if animation:
                 self.draw_graph(xCenter=xCenter,
                                 cBest=cBest, cMin=cMin,
-                                etheta=etheta, rnd=rnd)
+                                e_theta=e_theta, rnd=rnd)
 
         return path
 
@@ -108,9 +111,9 @@ class InformedRRTStar:
         for i in nearInds:
             dx = newNode.x - self.node_list[i].x
             dy = newNode.y - self.node_list[i].y
-            d = math.sqrt(dx ** 2 + dy ** 2)
+            d = math.hypot(dx, dy)
             theta = math.atan2(dy, dx)
-            if self.check_collision_extend(self.node_list[i], theta, d):
+            if self.check_collision(self.node_list[i], theta, d):
                 dList.append(self.node_list[i].cost + d)
             else:
                 dList.append(float('inf'))
@@ -119,7 +122,7 @@ class InformedRRTStar:
         minInd = nearInds[dList.index(minCost)]
 
         if minCost == float('inf'):
-            print("mincost is inf")
+            print("min cost is inf")
             return newNode
 
         newNode.cost = minCost
@@ -128,12 +131,12 @@ class InformedRRTStar:
         return newNode
 
     def find_near_nodes(self, newNode):
-        nnode = len(self.node_list)
-        r = 50.0 * math.sqrt((math.log(nnode) / nnode))
-        dlist = [(node.x - newNode.x) ** 2
-                 + (node.y - newNode.y) ** 2 for node in self.node_list]
-        nearinds = [dlist.index(i) for i in dlist if i <= r ** 2]
-        return nearinds
+        n_node = len(self.node_list)
+        r = 50.0 * math.sqrt((math.log(n_node) / n_node))
+        d_list = [(node.x - newNode.x) ** 2 + (node.y - newNode.y) ** 2
+                  for node in self.node_list]
+        near_inds = [d_list.index(i) for i in d_list if i <= r ** 2]
+        return near_inds
 
     def informed_sample(self, cMax, cMin, xCenter, C):
         if cMax < float('inf'):
@@ -194,25 +197,14 @@ class InformedRRTStar:
         minIndex = dList.index(min(dList))
         return minIndex
 
-    @staticmethod
-    def collision_check(newNode, obstacleList):
-        for (ox, oy, size) in obstacleList:
-            dx = ox - newNode.x
-            dy = oy - newNode.y
-            d = dx * dx + dy * dy
-            if d <= 1.1 * size ** 2:
-                return False  # collision
-
-        return True  # safe
-
-    def get_new_node(self, theta, nind, nearestNode):
+    def get_new_node(self, theta, n_ind, nearestNode):
         newNode = copy.deepcopy(nearestNode)
 
         newNode.x += self.expand_dis * math.cos(theta)
         newNode.y += self.expand_dis * math.sin(theta)
 
         newNode.cost += self.expand_dis
-        newNode.parent = nind
+        newNode.parent = n_ind
         return newNode
 
     def is_near_goal(self, node):
@@ -229,25 +221,45 @@ class InformedRRTStar:
             d = math.sqrt((nearNode.x - newNode.x) ** 2
                           + (nearNode.y - newNode.y) ** 2)
 
-            scost = newNode.cost + d
+            s_cost = newNode.cost + d
 
-            if nearNode.cost > scost:
+            if nearNode.cost > s_cost:
                 theta = math.atan2(newNode.y - nearNode.y,
                                    newNode.x - nearNode.x)
-                if self.check_collision_extend(nearNode, theta, d):
+                if self.check_collision(nearNode, theta, d):
                     nearNode.parent = n_node - 1
-                    nearNode.cost = scost
+                    nearNode.cost = s_cost
 
-    def check_collision_extend(self, nearNode, theta, d):
-        tmpNode = copy.deepcopy(nearNode)
+    @staticmethod
+    def distance_squared_point_to_segment(v, w, p):
+        # Return minimum distance between line segment vw and point p
+        if np.array_equal(v, w):
+            return (p - v).dot(p - v)  # v == w case
+        l2 = (w - v).dot(w - v)  # i.e. |w-v|^2 -  avoid a sqrt
+        # Consider the line extending the segment,
+        # parameterized as v + t (w - v).
+        # We find projection of point p onto the line.
+        # It falls where t = [(p-v) . (w-v)] / |w-v|^2
+        # We clamp t from [0,1] to handle points outside the segment vw.
+        t = max(0, min(1, (p - v).dot(w - v) / l2))
+        projection = v + t * (w - v)  # Projection falls on the segment
+        return (p - projection).dot(p - projection)
 
-        for i in range(int(d / self.expand_dis)):
-            tmpNode.x += self.expand_dis * math.cos(theta)
-            tmpNode.y += self.expand_dis * math.sin(theta)
-            if not self.collision_check(tmpNode, self.obstacle_list):
-                return False
-
+    def check_segment_collision(self, x1, y1, x2, y2):
+        for (ox, oy, size) in self.obstacle_list:
+            dd = self.distance_squared_point_to_segment(
+                np.array([x1, y1]),
+                np.array([x2, y2]),
+                np.array([ox, oy]))
+            if dd <= size ** 2:
+                return False  # collision
         return True
+
+    def check_collision(self, nearNode, theta, d):
+        tmpNode = copy.deepcopy(nearNode)
+        end_x = tmpNode.x + math.cos(theta) * d
+        end_y = tmpNode.y + math.sin(theta) * d
+        return self.check_segment_collision(tmpNode.x, tmpNode.y, end_x, end_y)
 
     def get_final_course(self, lastIndex):
         path = [[self.goal.x, self.goal.y]]
@@ -258,13 +270,17 @@ class InformedRRTStar:
         path.append([self.start.x, self.start.y])
         return path
 
-    def draw_graph(self, xCenter=None, cBest=None, cMin=None, etheta=None, rnd=None):
-
+    def draw_graph(self, xCenter=None, cBest=None, cMin=None, e_theta=None,
+                   rnd=None):
         plt.clf()
+        # for stopping simulation with the esc key.
+        plt.gcf().canvas.mpl_connect(
+            'key_release_event',
+            lambda event: [exit(0) if event.key == 'escape' else None])
         if rnd is not None:
             plt.plot(rnd[0], rnd[1], "^k")
             if cBest != float('inf'):
-                self.plot_ellipse(xCenter, cBest, cMin, etheta)
+                self.plot_ellipse(xCenter, cBest, cMin, e_theta)
 
         for node in self.node_list:
             if node.parent is not None:
@@ -282,20 +298,18 @@ class InformedRRTStar:
         plt.pause(0.01)
 
     @staticmethod
-    def plot_ellipse(xCenter, cBest, cMin, etheta):  # pragma: no cover
+    def plot_ellipse(xCenter, cBest, cMin, e_theta):  # pragma: no cover
 
         a = math.sqrt(cBest ** 2 - cMin ** 2) / 2.0
         b = cBest / 2.0
-        angle = math.pi / 2.0 - etheta
+        angle = math.pi / 2.0 - e_theta
         cx = xCenter[0]
         cy = xCenter[1]
-
         t = np.arange(0, 2 * math.pi + 0.1, 0.1)
         x = [a * math.cos(it) for it in t]
         y = [b * math.sin(it) for it in t]
-        R = np.array([[math.cos(angle), math.sin(angle)],
-                      [-math.sin(angle), math.cos(angle)]])
-        fx = R @ np.array([x, y])
+        rot = Rot.from_euler('z', -angle).as_matrix()[0:2, 0:2]
+        fx = rot @ np.array([x, y])
         px = np.array(fx[0, :] + cx).flatten()
         py = np.array(fx[1, :] + cy).flatten()
         plt.plot(cx, cy, "xc")

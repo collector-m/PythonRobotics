@@ -2,7 +2,7 @@
 
 Mobile robot motion planning sample with Dynamic Window Approach
 
-author: Atsushi Sakai (@Atsushi_twi), Goktug Karakasli
+author: Atsushi Sakai (@Atsushi_twi), Göktuğ Karakaşlı
 
 """
 
@@ -22,7 +22,7 @@ def dwa_control(x, config, goal, ob):
 
     dw = calc_dynamic_window(x, config)
 
-    u, trajectory = calc_final_input(x, dw, config, goal, ob)
+    u, trajectory = calc_control_and_trajectory(x, dw, config, goal, ob)
 
     return u, trajectory
 
@@ -41,11 +41,11 @@ class Config:
         # robot parameter
         self.max_speed = 1.0  # [m/s]
         self.min_speed = -0.5  # [m/s]
-        self.max_yawrate = 40.0 * math.pi / 180.0  # [rad/s]
+        self.max_yaw_rate = 40.0 * math.pi / 180.0  # [rad/s]
         self.max_accel = 0.2  # [m/ss]
-        self.max_dyawrate = 40.0 * math.pi / 180.0  # [rad/ss]
-        self.v_reso = 0.01  # [m/s]
-        self.yawrate_reso = 0.1 * math.pi / 180.0  # [rad/s]
+        self.max_delta_yaw_rate = 40.0 * math.pi / 180.0  # [rad/ss]
+        self.v_resolution = 0.01  # [m/s]
+        self.yaw_rate_resolution = 0.1 * math.pi / 180.0  # [rad/s]
         self.dt = 0.1  # [s] Time tick for motion prediction
         self.predict_time = 3.0  # [s]
         self.to_goal_cost_gain = 0.15
@@ -93,15 +93,15 @@ def calc_dynamic_window(x, config):
 
     # Dynamic window from robot specification
     Vs = [config.min_speed, config.max_speed,
-          -config.max_yawrate, config.max_yawrate]
+          -config.max_yaw_rate, config.max_yaw_rate]
 
     # Dynamic window from motion model
     Vd = [x[3] - config.max_accel * config.dt,
           x[3] + config.max_accel * config.dt,
-          x[4] - config.max_dyawrate * config.dt,
-          x[4] + config.max_dyawrate * config.dt]
+          x[4] - config.max_delta_yaw_rate * config.dt,
+          x[4] + config.max_delta_yaw_rate * config.dt]
 
-    #  [vmin,vmax, yaw_rate min, yaw_rate max]
+    #  [v_min, v_max, yaw_rate_min, yaw_rate_max]
     dw = [max(Vs[0], Vd[0]), min(Vs[1], Vd[1]),
           max(Vs[2], Vd[2]), min(Vs[3], Vd[3])]
 
@@ -114,17 +114,17 @@ def predict_trajectory(x_init, v, y, config):
     """
 
     x = np.array(x_init)
-    traj = np.array(x)
+    trajectory = np.array(x)
     time = 0
     while time <= config.predict_time:
         x = motion(x, [v, y], config.dt)
-        traj = np.vstack((traj, x))
+        trajectory = np.vstack((trajectory, x))
         time += config.dt
 
-    return traj
+    return trajectory
 
 
-def calc_final_input(x, dw, config, goal, ob):
+def calc_control_and_trajectory(x, dw, config, goal, ob):
     """
     calculation final input with dynamic window
     """
@@ -135,8 +135,8 @@ def calc_final_input(x, dw, config, goal, ob):
     best_trajectory = np.array([x])
 
     # evaluate all trajectory with sampled input in dynamic window
-    for v in np.arange(dw[0], dw[1], config.v_reso):
-        for y in np.arange(dw[2], dw[3], config.yawrate_reso):
+    for v in np.arange(dw[0], dw[1], config.v_resolution):
+        for y in np.arange(dw[2], dw[3], config.yaw_rate_resolution):
 
             trajectory = predict_trajectory(x_init, v, y, config)
 
@@ -164,7 +164,7 @@ def calc_obstacle_cost(trajectory, ob, config):
     oy = ob[:, 1]
     dx = trajectory[:, 0] - ox[:, None]
     dy = trajectory[:, 1] - oy[:, None]
-    r = np.sqrt(np.square(dx) + np.square(dy))
+    r = np.hypot(dx, dy)
 
     if config.robot_type == RobotType.rectangle:
         yaw = trajectory[:, 2]
@@ -172,7 +172,7 @@ def calc_obstacle_cost(trajectory, ob, config):
         rot = np.transpose(rot, [2, 0, 1])
         local_ob = ob[:, None] - trajectory[:, 0:2]
         local_ob = local_ob.reshape(-1, local_ob.shape[-1])
-        local_ob = np.array([local_ob @ -x for x in rot])
+        local_ob = np.array([local_ob @ x for x in rot])
         local_ob = local_ob.reshape(-1, local_ob.shape[-1])
         upper_check = local_ob[:, 0] <= config.robot_length / 2
         right_check = local_ob[:, 1] <= config.robot_width / 2
@@ -182,7 +182,7 @@ def calc_obstacle_cost(trajectory, ob, config):
                            np.logical_and(bottom_check, left_check))).any():
             return float("Inf")
     elif config.robot_type == RobotType.circle:
-        if (r <= config.robot_radius).any():
+        if np.array(r <= config.robot_radius).any():
             return float("Inf")
 
     min_r = np.min(r)
@@ -268,6 +268,10 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
 
         if show_animation:
             plt.cla()
+            # for stopping simulation with the esc key.
+            plt.gcf().canvas.mpl_connect(
+                'key_release_event',
+                lambda event: [exit(0) if event.key == 'escape' else None])
             plt.plot(predicted_trajectory[:, 0], predicted_trajectory[:, 1], "-g")
             plt.plot(x[0], x[1], "xr")
             plt.plot(goal[0], goal[1], "xb")
@@ -279,7 +283,7 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
             plt.pause(0.0001)
 
         # check reaching goal
-        dist_to_goal = math.sqrt((x[0] - goal[0]) ** 2 + (x[1] - goal[1]) ** 2)
+        dist_to_goal = math.hypot(x[0] - goal[0], x[1] - goal[1])
         if dist_to_goal <= config.robot_radius:
             print("Goal!!")
             break
@@ -294,3 +298,4 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
 
 if __name__ == '__main__':
     main(robot_type=RobotType.rectangle)
+    # main(robot_type=RobotType.circle)
